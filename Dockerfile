@@ -3,11 +3,17 @@ FROM wordpress:latest
 # Apache 모듈 활성화
 RUN a2enmod rewrite
 
-# Apache 포트 8080 설정
-# ports.conf에서 Listen 80을 Listen 8080으로 변경
+# Apache 포트 8080 설정 및 권한 설정
 RUN sed -i 's/^Listen 80/Listen 8080/' /etc/apache2/ports.conf
-# 000-default.conf에서 VirtualHost *:80을 VirtualHost *:8080으로 변경
 RUN sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:8080>/' /etc/apache2/sites-available/000-default.conf
+
+# Apache 설정에 Directory 권한 추가
+RUN echo "    <Directory /var/www/html>" >> /etc/apache2/sites-available/000-default.conf
+RUN echo "        Options Indexes FollowSymLinks" >> /etc/apache2/sites-available/000-default.conf
+RUN echo "        AllowOverride All" >> /etc/apache2/sites-available/000-default.conf
+RUN echo "        Require all granted" >> /etc/apache2/sites-available/000-default.conf
+RUN echo "        DirectoryIndex index.php index.html" >> /etc/apache2/sites-available/000-default.conf
+RUN echo "    </Directory>" >> /etc/apache2/sites-available/000-default.conf
 
 # PHP 설정 최적화
 RUN { \
