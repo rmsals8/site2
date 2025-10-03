@@ -19,12 +19,14 @@ RUN mkdir -p /var/www/html/wp-content/uploads && \
 # --- Ensure WordPress core exists (some runtimes mount empty volume) ---
 RUN curl -sSL https://wordpress.org/latest.tar.gz | tar -xz --strip-components=1 -C /var/www/html
 
-# --- Copy custom theme and plugin ---
-COPY wp-content/themes/hueman-custom    /var/www/html/wp-content/themes/hueman-custom
-COPY wp-content/plugins/    /var/www/html/wp-content/plugins/
+# --- Copy wp-content directory ---
+COPY wp-content/    /var/www/html/wp-content/
 
-# --- Set ownership ---
+# --- Set ownership and permissions ---
 RUN chown -R www-data:www-data /var/www/html
+RUN find /var/www/html -type d -exec chmod 755 {} \;
+RUN find /var/www/html -type f -exec chmod 644 {} \;
+RUN chmod -R 775 /var/www/html/wp-content
 
 # Change Apache listen port from 80 ➜ 8080 to avoid privileged port requirement in non-root containers (e.g., Cloudtype)
 RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/default-ssl.conf
