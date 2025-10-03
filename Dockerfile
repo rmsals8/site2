@@ -1,0 +1,26 @@
+FROM wordpress:latest
+
+# Apache 모듈 활성화
+RUN a2enmod rewrite
+
+# PHP 설정 최적화
+RUN { \
+    echo 'upload_max_filesize = 64M'; \
+    echo 'post_max_size = 64M'; \
+    echo 'memory_limit = 256M'; \
+    echo 'max_execution_time = 300'; \
+    echo 'max_input_vars = 3000'; \
+    echo 'file_uploads = On'; \
+} > /usr/local/etc/php/conf.d/uploads.ini
+
+# WordPress 파일 권한 설정
+RUN chown -R www-data:www-data /var/www/html
+
+# wp-content 폴더 복사 (테마, 플러그인 등)
+COPY wp-content/ /var/www/html/wp-content/
+
+# 포트 80 노출
+EXPOSE 80
+
+# Apache 시작
+CMD ["apache2-foreground"]
