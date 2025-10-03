@@ -12,6 +12,7 @@ RUN echo "    <Directory /var/www/html>" >> /etc/apache2/sites-available/000-def
 RUN echo "        Options Indexes FollowSymLinks" >> /etc/apache2/sites-available/000-default.conf
 RUN echo "        AllowOverride All" >> /etc/apache2/sites-available/000-default.conf
 RUN echo "        Require all granted" >> /etc/apache2/sites-available/000-default.conf
+RUN echo "        DirectoryIndex index.php index.html" >> /etc/apache2/sites-available/000-default.conf
 RUN echo "    </Directory>" >> /etc/apache2/sites-available/000-default.conf
 RUN echo "    ErrorLog \${APACHE_LOG_DIR}/error.log" >> /etc/apache2/sites-available/000-default.conf
 RUN echo "    CustomLog \${APACHE_LOG_DIR}/access.log combined" >> /etc/apache2/sites-available/000-default.conf
@@ -30,8 +31,8 @@ RUN { \
 # WordPress 파일 권한 설정
 RUN chown -R www-data:www-data /var/www/html
 
-# wp-content 폴더 복사 (테마, 플러그인 등)
-COPY wp-content/ /var/www/html/wp-content/
+# 전체 WordPress 파일 복사
+COPY . /var/www/html/
 
 # WordPress 파일 권한 설정
 RUN chown -R www-data:www-data /var/www/html
