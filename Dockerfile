@@ -13,22 +13,13 @@ RUN echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/uploads.ini &&
     echo "post_max_size = 64M" >> /usr/local/etc/php/conf.d/uploads.ini && \
     echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/uploads.ini
 
-# Create uploads directory
-RUN mkdir -p /var/www/html/wp-content/uploads && \
-    chown -R www-data:www-data /var/www/html/wp-content/uploads
-
-# --- Copy wp-content directory ---
-COPY wp-content/ /var/www/html/wp-content/
+# --- Copy wp-content directory to a backup location ---
+# We'll restore it after WordPress core is installed
+COPY wp-content/ /var/www/html/wp-content-backup/
 
 # --- Copy custom entrypoint script ---
 COPY docker-entrypoint.sh /usr/local/bin/custom-entrypoint.sh
 RUN chmod +x /usr/local/bin/custom-entrypoint.sh
-
-# --- Set ownership and permissions ---
-RUN chown -R www-data:www-data /var/www/html
-RUN find /var/www/html -type d -exec chmod 755 {} \;
-RUN find /var/www/html -type f -exec chmod 644 {} \;
-RUN chmod -R 775 /var/www/html/wp-content
 
 # Change Apache listen port from 80 ➜ 8080 to avoid privileged port requirement in non-root containers (e.g., Cloudtype)
 RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/default-ssl.conf
