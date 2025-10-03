@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: wordpress_blog
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress_password_2024
+      MYSQL_ROOT_PASSWORD: root_password_2024
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password_2024"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  wordpress:
+    depends_on:
+      db:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password_2024
+      WORDPRESS_DB_NAME: wordpress_blog
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_MEMORY_LIMIT', '256M');
+        define('WP_MAX_MEMORY_LIMIT', '512M');
+        define('FS_METHOD', 'direct');
+    volumes:
+      - wordpress_data:/var/www/html/wp-content/uploads
+
+volumes:
+  wordpress_data:
+  mysql_data:

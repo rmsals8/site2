@@ -1,10 +1,11 @@
 FROM wordpress:latest
 
-# Install required packages
+# Install required packages (including mysql-client for healthcheck)
 RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     vim \
+    default-mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Set upload limits
@@ -16,20 +17,12 @@ RUN echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/uploads.ini &&
 RUN mkdir -p /var/www/html/wp-content/uploads && \
     chown -R www-data:www-data /var/www/html/wp-content/uploads
 
-# --- Ensure WordPress core exists (some runtimes mount empty volume) ---
-RUN curl -sSL https://wordpress.org/latest.tar.gz | tar -xz --strip-components=1 -C /var/www/html
-
-# --- Create wp-config.php with environment variables ---
-RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
-
-# --- Configure wp-config.php with environment variables ---
-RUN sed -i "s/database_name_here/\${WORDPRESS_DB_NAME:-wordpress}/" /var/www/html/wp-config.php && \
-    sed -i "s/username_here/\${WORDPRESS_DB_USER:-root}/" /var/www/html/wp-config.php && \
-    sed -i "s/password_here/\${WORDPRESS_DB_PASSWORD:-}/" /var/www/html/wp-config.php && \
-    sed -i "s/localhost/\${WORDPRESS_DB_HOST:-localhost}/" /var/www/html/wp-config.php
-
 # --- Copy wp-content directory ---
-COPY wp-content/    /var/www/html/wp-content/
+COPY wp-content/ /var/www/html/wp-content/
+
+# --- Copy custom entrypoint script ---
+COPY docker-entrypoint.sh /usr/local/bin/custom-entrypoint.sh
+RUN chmod +x /usr/local/bin/custom-entrypoint.sh
 
 # --- Set ownership and permissions ---
 RUN chown -R www-data:www-data /var/www/html
@@ -45,3 +38,7 @@ RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf &&
 
 # Expose new application port
 EXPOSE 8080
+
+# Use custom entrypoint
+ENTRYPOINT ["/usr/local/bin/custom-entrypoint.sh"]
+CMD ["apache2-foreground"]

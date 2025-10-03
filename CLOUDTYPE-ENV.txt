@@ -1,0 +1,37 @@
+# CloudType 환경변수 설정
+
+CloudType 대시보드의 "환경변수" 섹션에 아래 내용을 복사해서 붙여넣으세요.
+
+## 필수 환경변수
+
+WORDPRESS_DB_HOST=svc.sel4.cloudtype.app:30333
+WORDPRESS_DB_USER=rmsals
+WORDPRESS_DB_PASSWORD=1q2w3e
+WORDPRESS_DB_NAME=blog1
+
+## 선택 환경변수 (추가 성능 및 설정)
+
+WORDPRESS_CONFIG_EXTRA=define('WP_MEMORY_LIMIT', '256M'); define('WP_MAX_MEMORY_LIMIT', '512M'); define('FS_METHOD', 'direct');
+
+---
+
+## 환경변수 입력 방법
+
+CloudType 대시보드에서:
+1. 프로젝트 선택
+2. "설정" 탭 클릭
+3. "환경변수" 섹션에서 "추가" 버튼 클릭
+4. 각 환경변수를 키=값 형태로 입력
+
+예시:
+키: WORDPRESS_DB_HOST
+값: svc.sel4.cloudtype.app:30333
+
+키: WORDPRESS_DB_USER
+값: rmsals
+
+키: WORDPRESS_DB_PASSWORD
+값: 1q2w3e
+
+키: WORDPRESS_DB_NAME
+값: blog1
