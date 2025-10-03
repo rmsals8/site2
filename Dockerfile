@@ -4,19 +4,10 @@ FROM wordpress:latest
 RUN a2enmod rewrite
 
 # Apache 포트 8080 설정
-RUN echo "Listen 8080" > /etc/apache2/ports.conf
-RUN echo "<VirtualHost *:8080>" > /etc/apache2/sites-available/000-default.conf
-RUN echo "    ServerAdmin webmaster@localhost" >> /etc/apache2/sites-available/000-default.conf
-RUN echo "    DocumentRoot /var/www/html" >> /etc/apache2/sites-available/000-default.conf
-RUN echo "    <Directory /var/www/html>" >> /etc/apache2/sites-available/000-default.conf
-RUN echo "        Options Indexes FollowSymLinks" >> /etc/apache2/sites-available/000-default.conf
-RUN echo "        AllowOverride All" >> /etc/apache2/sites-available/000-default.conf
-RUN echo "        Require all granted" >> /etc/apache2/sites-available/000-default.conf
-RUN echo "        DirectoryIndex index.php index.html" >> /etc/apache2/sites-available/000-default.conf
-RUN echo "    </Directory>" >> /etc/apache2/sites-available/000-default.conf
-RUN echo "    ErrorLog \${APACHE_LOG_DIR}/error.log" >> /etc/apache2/sites-available/000-default.conf
-RUN echo "    CustomLog \${APACHE_LOG_DIR}/access.log combined" >> /etc/apache2/sites-available/000-default.conf
-RUN echo "</VirtualHost>" >> /etc/apache2/sites-available/000-default.conf
+# ports.conf에서 Listen 80을 Listen 8080으로 변경
+RUN sed -i 's/^Listen 80/Listen 8080/' /etc/apache2/ports.conf
+# 000-default.conf에서 VirtualHost *:80을 VirtualHost *:8080으로 변경
+RUN sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:8080>/' /etc/apache2/sites-available/000-default.conf
 
 # PHP 설정 최적화
 RUN { \
@@ -30,14 +21,12 @@ RUN { \
 
 # WordPress 파일 권한 설정
 RUN chown -R www-data:www-data /var/www/html
+RUN find /var/www/html -type d -exec chmod 755 {} +
+RUN find /var/www/html -type f -exec chmod 644 {} +
+RUN chmod -R 775 /var/www/html/wp-content
 
 # wp-content 폴더만 복사 (WordPress 기본 파일 보존)
 COPY wp-content/ /var/www/html/wp-content/
-
-# WordPress 파일 권한 설정
-RUN chown -R www-data:www-data /var/www/html
-RUN chmod -R 755 /var/www/html
-RUN chmod -R 775 /var/www/html/wp-content
 
 # 포트 8080 노출
 EXPOSE 8080
