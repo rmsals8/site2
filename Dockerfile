@@ -31,8 +31,8 @@ RUN { \
 # WordPress 파일 권한 설정
 RUN chown -R www-data:www-data /var/www/html
 
-# 전체 WordPress 파일 복사
-COPY . /var/www/html/
+# wp-content 폴더만 복사 (WordPress 기본 파일 보존)
+COPY wp-content/ /var/www/html/wp-content/
 
 # WordPress 파일 권한 설정
 RUN chown -R www-data:www-data /var/www/html

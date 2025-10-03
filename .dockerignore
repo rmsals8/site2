@@ -1,0 +1,20 @@
+# Git 관련
+.git
+.gitignore
+
+# Docker 관련
+Dockerfile
+.dockerignore
+
+# 개발 도구
+*.bat
+*.log
+
+# 임시 파일
+temp-clone/
+
+# WordPress 기본 파일들 (이미 이미지에 포함됨)
+index.php
+wp-config.php
+wp-admin/
+wp-includes/
