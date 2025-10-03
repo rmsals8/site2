@@ -33,6 +33,13 @@ RUN chmod -R 775 /var/www/html/wp-content
 # Change Apache listen port from 80 ➜ 8080 to avoid privileged port requirement in non-root containers (e.g., Cloudtype)
 RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/default-ssl.conf
 
+# Fix Apache Directory permissions - Allow access to /var/www/html
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf && \
+    sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf
+
+# Enable Apache modules
+RUN a2enmod rewrite
+
 # Suppress "Could not reliably determine the server's fully qualified domain name" warning
 RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf && a2enconf servername
 
