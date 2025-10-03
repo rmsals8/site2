@@ -19,6 +19,15 @@ RUN mkdir -p /var/www/html/wp-content/uploads && \
 # --- Ensure WordPress core exists (some runtimes mount empty volume) ---
 RUN curl -sSL https://wordpress.org/latest.tar.gz | tar -xz --strip-components=1 -C /var/www/html
 
+# --- Create wp-config.php with environment variables ---
+RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+
+# --- Configure wp-config.php with environment variables ---
+RUN sed -i "s/database_name_here/\${WORDPRESS_DB_NAME:-wordpress}/" /var/www/html/wp-config.php && \
+    sed -i "s/username_here/\${WORDPRESS_DB_USER:-root}/" /var/www/html/wp-config.php && \
+    sed -i "s/password_here/\${WORDPRESS_DB_PASSWORD:-}/" /var/www/html/wp-config.php && \
+    sed -i "s/localhost/\${WORDPRESS_DB_HOST:-localhost}/" /var/www/html/wp-config.php
+
 # --- Copy wp-content directory ---
 COPY wp-content/    /var/www/html/wp-content/
 
