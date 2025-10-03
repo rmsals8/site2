@@ -1,0 +1,331 @@
+/* 추가 스타일 - 더 자연스럽고 사람다운 느낌 */
+
+/* 손으로 그린 듯한 밑줄 효과 */
+.post-title a {
+    position: relative;
+}
+
+.post-title a:hover:after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10"><path d="M2,5 Q25,2 50,5 T98,5" stroke="%23ff6b6b" stroke-width="2" fill="none"/></svg>') repeat-x;
+    background-size: 100px 10px;
+}
+
+/* 불규칙한 그림자들 */
+.post-card:nth-child(3n+1) {
+    box-shadow: 3px 8px 15px rgba(255,107,107,0.15);
+    transform: rotate(0.8deg);
+}
+
+.post-card:nth-child(3n+2) {
+    box-shadow: -5px 6px 12px rgba(255,107,107,0.18);
+    transform: rotate(-0.3deg);
+}
+
+.post-card:nth-child(3n+3) {
+    box-shadow: 2px -4px 18px rgba(255,107,107,0.12);
+    transform: rotate(0.2deg);
+}
+
+/* 스티커 같은 효과 */
+.post-category:before {
+    content: '✨';
+    margin-right: 5px;
+}
+
+.post-category:nth-child(2n):before {
+    content: '🎨';
+}
+
+.post-category:nth-child(3n):before {
+    content: '💖';
+}
+
+/* 손글씨 느낌의 메타 정보 */
+.post-meta {
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 0.85rem;
+    color: #666;
+    transform: rotate(-0.2deg);
+}
+
+/* 사이드바 위젯들에 개성 추가 */
+.widget:nth-child(odd) {
+    transform: rotate(0.5deg);
+}
+
+.widget:nth-child(even) {
+    transform: rotate(-0.3deg);
+}
+
+/* 소셜 버튼들을 더 재미있게 */
+.social-btn {
+    transition: all 0.3s ease;
+}
+
+.social-btn:hover {
+    transform: scale(1.2) rotate(10deg);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* 광고 공간을 더 자연스럽게 */
+.ad-space,
+.ad-space-sidebar {
+    background: linear-gradient(45deg, #fff 25%, transparent 25%), 
+                linear-gradient(-45deg, #fff 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #fff 75%), 
+                linear-gradient(-45deg, transparent 75%, #fff 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    background-color: #ffeaa7;
+    border: 3px dashed #fdcb6e;
+    border-radius: 15px;
+    transform: rotate(-0.5deg);
+}
+
+/* 푸터를 더 친근하게 */
+.site-footer {
+    background: #fff;
+    color: #333;
+    border-top: 4px wavy #ff6b6b;
+    transform: rotate(-0.2deg);
+}
+
+/* 검색창을 더 귀엽게 */
+.header-search input {
+    border: 3px solid #ff6b6b;
+    border-radius: 25px;
+    padding: 10px 15px;
+    font-family: 'Comic Sans MS', cursive;
+    transform: rotate(0.5deg);
+}
+
+.header-search button {
+    background: #ff6b6b;
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    margin-left: 10px;
+    transform: rotate(-5deg);
+    transition: transform 0.3s ease;
+}
+
+.header-search button:hover {
+    transform: rotate(0deg) scale(1.1);
+}
+
+/* 댓글 섹션도 자연스럽게 */
+.comments-section {
+    border: 2px dashed #ff6b6b;
+    border-radius: 20px;
+    background: #fff;
+    transform: rotate(0.3deg);
+}
+
+/* 호버 효과에 재미 추가 */
+.recommended-posts .post-item:hover {
+    transform: scale(1.02) rotate(0.5deg);
+    transition: all 0.3s ease;
+}
+
+/* 카테고리 위젯 스타일링 */
+.category-widget {
+    background: #fff;
+    border: 3px dashed #ff6b6b;
+    border-radius: 20px;
+    padding: 25px;
+    transform: rotate(0.5deg);
+    box-shadow: 4px 4px 15px rgba(255,107,107,0.2);
+}
+
+.category-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0;
+}
+
+.category-item {
+    margin-bottom: 12px;
+    transform: rotate(-0.2deg);
+    transition: all 0.3s ease;
+}
+
+.category-item:hover {
+    transform: rotate(0deg) scale(1.02);
+}
+
+.category-link {
+    color: #333 !important;
+    text-decoration: none !important;
+    display: flex !important;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 15px;
+    background: rgba(255,107,107,0.05);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.category-link:hover {
+    background: rgba(255,107,107,0.1) !important;
+    border-color: #ff6b6b;
+    transform: scale(1.02);
+}
+
+.category-emoji {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.category-name {
+    flex: 1;
+    font-weight: 600;
+    font-family: 'Comic Sans MS', cursive;
+}
+
+.category-count {
+    color: #ff6b6b !important;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: rgba(255,107,107,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* 마우스 커서도 재미있게 (선택사항) */
+a, button {
+    cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="%23ff6b6b" opacity="0.7"/></svg>') 10 10, pointer;
+}
+
+/* 로딩 애니메이션 */
+@keyframes wiggle {
+    0%, 7% { transform: rotateZ(0); }
+    15% { transform: rotateZ(-15deg); }
+    20% { transform: rotateZ(10deg); }
+    25% { transform: rotateZ(-10deg); }
+    30% { transform: rotateZ(6deg); }
+    35% { transform: rotateZ(-4deg); }
+    40%, 100% { transform: rotateZ(0); }
+}
+
+.post-card:hover {
+    animation: wiggle 2s ease-in-out infinite;
+}
+
+/* 스크롤바도 예쁘게 */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #fef9f9;
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #ff6b6b, #ffeaa7);
+    border-radius: 6px;
+    border: 2px solid #fef9f9;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #ff5252, #fdcb6e);
+}
+
+/* WordPress 기본 위젯 스타일링 개선 */
+.widget_recent_entries ul,
+.widget_recent_comments ul {
+    list-style: none !important;
+    padding: 0 !important;
+}
+
+.widget_recent_entries li,
+.widget_recent_comments li {
+    background: rgba(255,107,107,0.05);
+    border: 2px solid rgba(255,107,107,0.1);
+    border-radius: 15px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    transform: rotate(-0.3deg);
+    transition: all 0.3s ease;
+    font-family: 'Comic Sans MS', cursive;
+}
+
+.widget_recent_entries li:hover,
+.widget_recent_comments li:hover {
+    transform: rotate(0deg) scale(1.02);
+    background: rgba(255,107,107,0.1);
+    border-color: #ff6b6b;
+    box-shadow: 2px 2px 8px rgba(255,107,107,0.2);
+}
+
+.widget_recent_entries a,
+.widget_recent_comments a {
+    color: #333 !important;
+    text-decoration: none !important;
+    font-weight: 600;
+    position: relative;
+}
+
+.widget_recent_entries a:hover,
+.widget_recent_comments a:hover {
+    color: #ff6b6b !important;
+}
+
+.widget_recent_entries a:before {
+    content: '📝 ';
+    margin-right: 5px;
+}
+
+.widget_recent_comments a:before {
+    content: '💬 ';
+    margin-right: 5px;
+}
+
+/* 날짜 스타일링 */
+.widget_recent_entries .post-date,
+.widget_recent_comments .comment-meta-link {
+    color: #999 !important;
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 5px;
+    transform: rotate(0.5deg);
+}
+
+/* 최신 글/댓글 제목을 더 눈에 띄게 */
+.widget_recent_entries .widget-title:before {
+    content: '📚 ';
+}
+
+.widget_recent_comments .widget-title:before {
+    content: '💭 ';
+}
+
+/* RECOMMENDED, 최신 글, 최신 댓글 링크 색상 수정 */
+.recommended-posts a,
+.widget_recent_entries a,
+.widget_recent_comments a,
+.whats-hot a,
+.widget_recent_entries ul li a,
+.widget_recent_comments ul li a,
+.sidebar .widget a,
+.sidebar a {
+    color: #333 !important;
+    text-decoration: none !important;
+}
+
+.recommended-posts a:hover,
+.widget_recent_entries a:hover,
+.widget_recent_comments a:hover,
+.whats-hot a:hover,
+.widget_recent_entries ul li a:hover,
+.widget_recent_comments ul li a:hover,
+.sidebar .widget a:hover,
+.sidebar a:hover {
+    color: #ff6b6b !important;
+}

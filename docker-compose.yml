@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress-blog
+    restart: unless-stopped
+    ports:
+      - "8585:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password_2024
+      WORDPRESS_DB_NAME: wordpress_blog
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_MEMORY_LIMIT', '256M');
+        define('WP_MAX_MEMORY_LIMIT', '512M');
+        define('FS_METHOD', 'direct');
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./wp-content:/var/www/html/wp-content
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    depends_on:
+      - db
+    networks:
+      - wordpress_network
+
+  db:
+    image: mysql:8.0
+    container_name: wordpress-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress_blog
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress_password_2024
+      MYSQL_ROOT_PASSWORD: root_password_2024
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - wordpress_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: wordpress-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8586:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root_password_2024
+    depends_on:
+      - db
+    networks:
+      - wordpress_network
+
+volumes:
+  wordpress_data:
+  mysql_data:
+
+networks:
+  wordpress_network:
+    driver: bridge
+
+
+
