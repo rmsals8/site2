@@ -65,16 +65,33 @@ RUN echo "# BEGIN WordPress" > /var/www/html/.htaccess && \
     echo "</IfModule>" >> /var/www/html/.htaccess && \
     echo "# END WordPress" >> /var/www/html/.htaccess
 
-# Simple Apache configuration - just change port to 8080
-RUN sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf && \
-    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/g' /etc/apache2/sites-available/000-default.conf && \
-    sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf && \
-    sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf && \
-    echo "<Directory /var/www/html/wp-admin>" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    Options Indexes FollowSymLinks" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    AllowOverride All" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    Require all granted" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "</Directory>" >> /etc/apache2/sites-available/000-default.conf
+# Create a new Apache configuration file for WordPress
+RUN echo '<VirtualHost *:8080>' > /etc/apache2/sites-available/wordpress.conf && \
+    echo '    ServerAdmin webmaster@localhost' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '    DocumentRoot /var/www/html' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '    <Directory /var/www/html>' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '        Options Indexes FollowSymLinks' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '        AllowOverride All' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '        Require all granted' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '    </Directory>' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '    <Directory /var/www/html/wp-admin>' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '        Options Indexes FollowSymLinks' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '        AllowOverride All' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '        Require all granted' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '    </Directory>' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '    ErrorLog ${APACHE_LOG_DIR}/error.log' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '    CustomLog ${APACHE_LOG_DIR}/access.log combined' >> /etc/apache2/sites-available/wordpress.conf && \
+    echo '</VirtualHost>' >> /etc/apache2/sites-available/wordpress.conf
+
+# Change Apache port to 8080
+RUN sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf
+
+# Disable default site and enable WordPress site
+RUN a2dissite 000-default.conf && \
+    a2ensite wordpress.conf
 
 # Enable rewrite module
 RUN a2enmod rewrite
