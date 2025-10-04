@@ -39,7 +39,7 @@ RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php && \
     echo "}" >> /var/www/html/wp-config.php && \
     echo "define('WP_HOME', 'https://port-0-site2-m9aydkxq51acab43.sel4.cloudtype.app');" >> /var/www/html/wp-config.php && \
     echo "define('WP_SITEURL', 'https://port-0-site2-m9aydkxq51acab43.sel4.cloudtype.app');" >> /var/www/html/wp-config.php && \
-    echo "define('FORCE_SSL_ADMIN', true);" >> /var/www/html/wp-config.php
+    echo "if (!defined('FORCE_SSL_ADMIN')) define('FORCE_SSL_ADMIN', true);" >> /var/www/html/wp-config.php
 
 # Set ownership and permissions
 RUN chown -R www-data:www-data /var/www/html
