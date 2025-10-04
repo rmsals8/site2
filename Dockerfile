@@ -33,7 +33,7 @@ RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php && \
     sed -i "s/localhost/svc.sel4.cloudtype.app:30333/" /var/www/html/wp-config.php && \
     sed -i "s/\$table_prefix = 'wp_';/\$table_prefix = 'wp_';/" /var/www/html/wp-config.php && \
     echo "\$_SERVER['HTTPS'] = 'on';" >> /var/www/html/wp-config.php && \
-    echo "define('FORCE_SSL_ADMIN', true);" >> /var/www/html/wp-config.php
+    echo "if (!defined('FORCE_SSL_ADMIN')) define('FORCE_SSL_ADMIN', true);" >> /var/www/html/wp-config.php
 
 # Set ownership and permissions
 RUN chown -R www-data:www-data /var/www/html
