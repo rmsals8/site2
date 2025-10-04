@@ -32,6 +32,9 @@ RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php && \
     sed -i "s/password_here/1q2w3e/" /var/www/html/wp-config.php && \
     sed -i "s/localhost/svc.sel4.cloudtype.app:30333/" /var/www/html/wp-config.php && \
     sed -i "s/\$table_prefix = 'wp_';/\$table_prefix = 'wp_';/" /var/www/html/wp-config.php && \
+    curl -s https://api.wordpress.org/secret-key/1.1/salt/ > /tmp/wp-keys.txt && \
+    sed -i "/put your unique phrase here/d" /var/www/html/wp-config.php && \
+    sed -i "/@-/r /tmp/wp-keys.txt" /var/www/html/wp-config.php && \
     echo "" >> /var/www/html/wp-config.php && \
     echo "/* SSL and Proxy Settings */" >> /var/www/html/wp-config.php && \
     echo "if (isset(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {" >> /var/www/html/wp-config.php && \
@@ -42,10 +45,6 @@ RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php && \
     echo "}" >> /var/www/html/wp-config.php && \
     echo "define('WP_HOME', 'https://port-0-site2-m9aydkxq51acab43.sel4.cloudtype.app');" >> /var/www/html/wp-config.php && \
     echo "define('WP_SITEURL', 'https://port-0-site2-m9aydkxq51acab43.sel4.cloudtype.app');" >> /var/www/html/wp-config.php && \
-    echo "if (!defined('COOKIE_DOMAIN')) define('COOKIE_DOMAIN', 'port-0-site2-m9aydkxq51acab43.sel4.cloudtype.app');" >> /var/www/html/wp-config.php && \
-    echo "if (!defined('ADMIN_COOKIE_PATH')) define('ADMIN_COOKIE_PATH', '/');" >> /var/www/html/wp-config.php && \
-    echo "if (!defined('COOKIEPATH')) define('COOKIEPATH', '/');" >> /var/www/html/wp-config.php && \
-    echo "if (!defined('SITECOOKIEPATH')) define('SITECOOKIEPATH', '/');" >> /var/www/html/wp-config.php && \
     echo "if (!defined('FORCE_SSL_ADMIN')) define('FORCE_SSL_ADMIN', true);" >> /var/www/html/wp-config.php
 
 # Set ownership and permissions
