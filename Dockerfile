@@ -45,10 +45,11 @@ RUN sed -i "s/database_name_here/blog4/" /var/www/html/wp-config-sample.php && \
 # Copy the configured wp-config-sample.php to wp-config.php
 RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
 
-# Fix WordPress admin CSS/JS loading issues
-RUN echo "define('WP_HOME', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config.php && \
-    echo "define('WP_SITEURL', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config.php && \
-    echo "define('FORCE_SSL_ADMIN', false);" >> /var/www/html/wp-config.php
+# Fix static file loading issues without causing redirect loops
+RUN echo "define('WP_DEBUG', false);" >> /var/www/html/wp-config.php && \
+    echo "define('WP_DEBUG_LOG', false);" >> /var/www/html/wp-config.php && \
+    echo "define('WP_DEBUG_DISPLAY', false);" >> /var/www/html/wp-config.php && \
+    echo "define('SCRIPT_DEBUG', false);" >> /var/www/html/wp-config.php
 
 # Set proper permissions for wp-content
 RUN chown -R www-data:www-data /var/www/html/wp-content && \
