@@ -52,8 +52,8 @@ RUN sed -i "s/database_name_here/blog4/" /var/www/html/wp-config-sample.php && \
     sed -i "s/localhost/svc.sel4.cloudtype.app:30333/" /var/www/html/wp-config-sample.php
 
 # Add additional WordPress configuration to prevent redirect loops
-RUN echo "define('WP_HOME', 'https://\$_SERVER['HTTP_HOST']');" >> /var/www/html/wp-config-sample.php && \
-    echo "define('WP_SITEURL', 'https://\$_SERVER['HTTP_HOST']');" >> /var/www/html/wp-config-sample.php && \
+RUN echo "define('WP_HOME', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config-sample.php && \
+    echo "define('WP_SITEURL', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config-sample.php && \
     echo "define('FORCE_SSL_ADMIN', false);" >> /var/www/html/wp-config-sample.php && \
     echo "define('WP_DEBUG', false);" >> /var/www/html/wp-config-sample.php
 
