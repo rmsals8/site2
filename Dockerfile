@@ -57,61 +57,17 @@ RUN echo "# BEGIN WordPress" > /var/www/html/.htaccess && \
     echo "</IfModule>" >> /var/www/html/.htaccess && \
     echo "# END WordPress" >> /var/www/html/.htaccess
 
-# Create ports.conf for port 8080
-RUN echo "Listen 8080" > /etc/apache2/ports.conf
-
-# Fix Apache main configuration
-RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf && \
+# Simple Apache configuration - just change port to 8080
+RUN sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf && \
+    sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/g' /etc/apache2/sites-available/000-default.conf && \
+    sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf && \
     sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf
 
-# Create complete Apache virtual host configuration
-RUN echo "<VirtualHost *:8080>" > /etc/apache2/sites-available/000-default.conf && \
-    echo "    ServerAdmin webmaster@localhost" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    DocumentRoot /var/www/html" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    ErrorLog \${APACHE_LOG_DIR}/error.log" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    CustomLog \${APACHE_LOG_DIR}/access.log combined" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    <Directory /var/www/html>" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "        Options Indexes FollowSymLinks" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "        AllowOverride All" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "        Require all granted" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "        DirectoryIndex index.php index.html" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    </Directory>" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    <Directory /var/www/html/wp-admin>" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "        Options Indexes FollowSymLinks" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "        AllowOverride All" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "        Require all granted" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    </Directory>" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "</VirtualHost>" >> /etc/apache2/sites-available/000-default.conf
+# Enable rewrite module
+RUN a2enmod rewrite
 
-# Enable Apache modules
-RUN a2enmod rewrite headers deflate expires
-
-# Disable default security configuration
-RUN a2disconf security
-
-# Create permissive security configuration
-RUN echo "<Directory />" > /etc/apache2/conf-available/permissive.conf && \
-    echo "    Options FollowSymLinks" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "    AllowOverride None" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "    Require all granted" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "</Directory>" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "<Directory /var/www/html>" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "    Options Indexes FollowSymLinks ExecCGI" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "    AllowOverride All" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "    Require all granted" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "    DirectoryIndex index.php index.html index.htm" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "</Directory>" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "<Directory /var/www/html/wp-admin>" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "    Options Indexes FollowSymLinks ExecCGI" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "    AllowOverride All" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "    Require all granted" >> /etc/apache2/conf-available/permissive.conf && \
-    echo "</Directory>" >> /etc/apache2/conf-available/permissive.conf && \
-    a2enconf permissive
-
-# Suppress Apache warning
-RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf && a2enconf servername
+# Set ServerName
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Expose new application port
 EXPOSE 8080
