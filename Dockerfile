@@ -20,9 +20,12 @@ RUN mkdir -p /var/www/html/wp-content/uploads && \
 RUN curl -sSL https://wordpress.org/latest.tar.gz | tar -xz --strip-components=1 -C /var/www/html
 
 # --- Copy custom theme and plugin ---
-COPY wp-content/themes/resume-theme    /var/www/html/wp-content/themes/resume-theme
-# NOTE: resume-manager plugin directory is currently empty; comment out to avoid build failure
-# COPY wp-content/plugins/resume-manager /var/www/html/wp-content/plugins/resume-manager
+COPY wp-content/themes/hueman-custom    /var/www/html/wp-content/themes/hueman-custom
+COPY wp-content/plugins/akismet         /var/www/html/wp-content/plugins/akismet
+COPY wp-content/plugins/head-footer-code /var/www/html/wp-content/plugins/head-footer-code
+COPY wp-content/plugins/jetpack         /var/www/html/wp-content/plugins/jetpack
+COPY wp-content/plugins/hello.php       /var/www/html/wp-content/plugins/hello.php
+COPY wp-content/plugins/hueman-essential-plugins.php /var/www/html/wp-content/plugins/hueman-essential-plugins.php
 
 # --- Set ownership ---
 RUN chown -R www-data:www-data /var/www/html
