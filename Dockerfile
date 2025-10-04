@@ -41,12 +41,22 @@ RUN find /var/www/html -type d -exec chmod 755 {} \;
 RUN find /var/www/html -type f -exec chmod 644 {} \;
 RUN chmod -R 775 /var/www/html/wp-content
 
+# Ensure wp-admin directory has proper permissions
+RUN chmod -R 755 /var/www/html/wp-admin
+
 # Change Apache listen port from 80 ➜ 8080
 RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/default-ssl.conf
 
 # Fix Apache Directory permissions
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf && \
     sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf
+
+# Add specific wp-admin directory configuration
+RUN echo "<Directory /var/www/html/wp-admin>" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "    Options Indexes FollowSymLinks" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "    AllowOverride All" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "    Require all granted" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "</Directory>" >> /etc/apache2/sites-available/000-default.conf
 
 # Enable Apache modules
 RUN a2enmod rewrite
