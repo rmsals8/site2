@@ -25,6 +25,18 @@ RUN ls -la /var/www/html/index.php
 # Copy wp-content directory (this will overwrite the default wp-content)
 COPY wp-content/ /var/www/html/wp-content/
 
+# Create wp-config.php at build time with hardcoded values
+RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php && \
+    sed -i "s/database_name_here/blog1/" /var/www/html/wp-config.php && \
+    sed -i "s/username_here/rmsals/" /var/www/html/wp-config.php && \
+    sed -i "s/password_here/1q2w3e/" /var/www/html/wp-config.php && \
+    sed -i "s/localhost/svc.sel4.cloudtype.app:30333/" /var/www/html/wp-config.php
+
+# Add WordPress security keys
+RUN SALT=$(curl -sS https://api.wordpress.org/secret-key/1.1/salt/) && \
+    sed -i "/put your unique phrase here/d" /var/www/html/wp-config.php && \
+    sed -i "/\$table_prefix/i $SALT" /var/www/html/wp-config.php
+
 # Set ownership and permissions
 RUN chown -R www-data:www-data /var/www/html
 RUN find /var/www/html -type d -exec chmod 755 {} \;
@@ -46,18 +58,3 @@ RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf &&
 
 # Expose new application port
 EXPOSE 8080
-
-# Override CMD to create wp-config.php and start Apache
-CMD bash -c ' \
-if [ ! -f /var/www/html/wp-config.php ]; then \
-    echo "Creating wp-config.php..."; \
-    cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php && \
-    sed -i "s/database_name_here/${WORDPRESS_DB_NAME}/" /var/www/html/wp-config.php && \
-    sed -i "s/username_here/${WORDPRESS_DB_USER}/" /var/www/html/wp-config.php && \
-    sed -i "s/password_here/${WORDPRESS_DB_PASSWORD}/" /var/www/html/wp-config.php && \
-    sed -i "s/localhost/${WORDPRESS_DB_HOST}/" /var/www/html/wp-config.php && \
-    SALT=$(curl -sS https://api.wordpress.org/secret-key/1.1/salt/) && \
-    printf "%s\n" "g/put your unique phrase here/d" "a" "$SALT" "." "w" | ed -s /var/www/html/wp-config.php && \
-    chown www-data:www-data /var/www/html/wp-config.php; \
-fi && \
-apache2-foreground'
