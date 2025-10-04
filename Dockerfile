@@ -45,15 +45,13 @@ RUN sed -i "s/database_name_here/blog4/" /var/www/html/wp-config-sample.php && \
 # Copy the configured wp-config-sample.php to wp-config.php
 RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
 
-# Fix Mixed Content issues and CSS loading
+# Fix Mixed Content issues without redirect loops
 RUN echo "if (!defined('WP_DEBUG')) define('WP_DEBUG', false);" >> /var/www/html/wp-config.php && \
     echo "if (!defined('WP_DEBUG_LOG')) define('WP_DEBUG_LOG', false);" >> /var/www/html/wp-config.php && \
     echo "if (!defined('WP_DEBUG_DISPLAY')) define('WP_DEBUG_DISPLAY', false);" >> /var/www/html/wp-config.php && \
     echo "if (!defined('SCRIPT_DEBUG')) define('SCRIPT_DEBUG', false);" >> /var/www/html/wp-config.php && \
     echo "if (!defined('FORCE_SSL_ADMIN')) define('FORCE_SSL_ADMIN', false);" >> /var/www/html/wp-config.php && \
     echo "if (!defined('WP_HTTPS')) define('WP_HTTPS', true);" >> /var/www/html/wp-config.php && \
-    echo "if (!defined('WP_HOME')) define('WP_HOME', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config.php && \
-    echo "if (!defined('WP_SITEURL')) define('WP_SITEURL', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config.php && \
     echo "if (!defined('CONCATENATE_SCRIPTS')) define('CONCATENATE_SCRIPTS', false);" >> /var/www/html/wp-config.php && \
     echo "if (!defined('COMPRESS_SCRIPTS')) define('COMPRESS_SCRIPTS', false);" >> /var/www/html/wp-config.php && \
     echo "if (!defined('COMPRESS_CSS')) define('COMPRESS_CSS', false);" >> /var/www/html/wp-config.php
