@@ -27,7 +27,7 @@ COPY wp-content/ /var/www/html/wp-content/
 
 # Create wp-config.php at build time with hardcoded values
 RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php && \
-    sed -i "s/database_name_here/blog1/" /var/www/html/wp-config.php && \
+    sed -i "s/database_name_here/blog2/" /var/www/html/wp-config.php && \
     sed -i "s/username_here/rmsals/" /var/www/html/wp-config.php && \
     sed -i "s/password_here/1q2w3e/" /var/www/html/wp-config.php && \
     sed -i "s/localhost/svc.sel4.cloudtype.app:30333/" /var/www/html/wp-config.php && \
