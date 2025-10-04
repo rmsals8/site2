@@ -13,8 +13,14 @@ RUN echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/uploads.ini &&
     echo "post_max_size = 64M" >> /usr/local/etc/php/conf.d/uploads.ini && \
     echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/uploads.ini
 
-# Download WordPress core files at build time
+# Clear /var/www/html completely first
+RUN rm -rf /var/www/html/*
+
+# Download and extract WordPress core files at build time
 RUN curl -sSL https://wordpress.org/latest.tar.gz | tar -xz --strip-components=1 -C /var/www/html
+
+# Verify index.php exists
+RUN ls -la /var/www/html/index.php
 
 # Copy wp-content directory (this will overwrite the default wp-content)
 COPY wp-content/ /var/www/html/wp-content/
@@ -29,17 +35,17 @@ RUN find /var/www/html -type d -exec chmod 755 {} \;
 RUN find /var/www/html -type f -exec chmod 644 {} \;
 RUN chmod -R 775 /var/www/html/wp-content
 
-# Change Apache listen port from 80 ➜ 8080 to avoid privileged port requirement in non-root containers (e.g., Cloudtype)
+# Change Apache listen port from 80 ➜ 8080
 RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/default-ssl.conf
 
-# Fix Apache Directory permissions - Allow access to /var/www/html
+# Fix Apache Directory permissions
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf && \
     sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf
 
 # Enable Apache modules
 RUN a2enmod rewrite
 
-# Suppress "Could not reliably determine the server's fully qualified domain name" warning
+# Suppress Apache warning
 RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf && a2enconf servername
 
 # Expose new application port
