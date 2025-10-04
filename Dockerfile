@@ -84,21 +84,31 @@ RUN echo "<VirtualHost *:8080>" > /etc/apache2/sites-available/000-default.conf 
     echo "</VirtualHost>" >> /etc/apache2/sites-available/000-default.conf
 
 # Enable Apache modules
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers deflate expires
 
-# Create security.conf to allow all access
-RUN echo "<Directory />" > /etc/apache2/conf-available/security.conf && \
-    echo "    Options FollowSymLinks" >> /etc/apache2/conf-available/security.conf && \
-    echo "    AllowOverride None" >> /etc/apache2/conf-available/security.conf && \
-    echo "    Require all granted" >> /etc/apache2/conf-available/security.conf && \
-    echo "</Directory>" >> /etc/apache2/conf-available/security.conf && \
-    echo "" >> /etc/apache2/conf-available/security.conf && \
-    echo "<Directory /var/www/html>" >> /etc/apache2/conf-available/security.conf && \
-    echo "    Options Indexes FollowSymLinks" >> /etc/apache2/conf-available/security.conf && \
-    echo "    AllowOverride All" >> /etc/apache2/conf-available/security.conf && \
-    echo "    Require all granted" >> /etc/apache2/conf-available/security.conf && \
-    echo "</Directory>" >> /etc/apache2/conf-available/security.conf && \
-    a2enconf security
+# Disable default security configuration
+RUN a2disconf security
+
+# Create permissive security configuration
+RUN echo "<Directory />" > /etc/apache2/conf-available/permissive.conf && \
+    echo "    Options FollowSymLinks" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "    AllowOverride None" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "    Require all granted" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "</Directory>" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "<Directory /var/www/html>" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "    Options Indexes FollowSymLinks ExecCGI" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "    AllowOverride All" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "    Require all granted" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "    DirectoryIndex index.php index.html index.htm" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "</Directory>" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "<Directory /var/www/html/wp-admin>" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "    Options Indexes FollowSymLinks ExecCGI" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "    AllowOverride All" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "    Require all granted" >> /etc/apache2/conf-available/permissive.conf && \
+    echo "</Directory>" >> /etc/apache2/conf-available/permissive.conf && \
+    a2enconf permissive
 
 # Suppress Apache warning
 RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf && a2enconf servername
