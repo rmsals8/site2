@@ -57,10 +57,10 @@ RUN echo "# BEGIN WordPress" > /var/www/html/.htaccess && \
     echo "</IfModule>" >> /var/www/html/.htaccess && \
     echo "# END WordPress" >> /var/www/html/.htaccess
 
-# Change Apache listen port from 80 ➜ 8080
-RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/default-ssl.conf
+# Create ports.conf for port 8080
+RUN echo "Listen 8080" > /etc/apache2/ports.conf
 
-# Fix Apache Directory permissions
+# Fix Apache main configuration
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf && \
     sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/Require all denied/Require all granted/' /etc/apache2/apache2.conf
 
@@ -85,6 +85,20 @@ RUN echo "<VirtualHost *:8080>" > /etc/apache2/sites-available/000-default.conf 
 
 # Enable Apache modules
 RUN a2enmod rewrite
+
+# Create security.conf to allow all access
+RUN echo "<Directory />" > /etc/apache2/conf-available/security.conf && \
+    echo "    Options FollowSymLinks" >> /etc/apache2/conf-available/security.conf && \
+    echo "    AllowOverride None" >> /etc/apache2/conf-available/security.conf && \
+    echo "    Require all granted" >> /etc/apache2/conf-available/security.conf && \
+    echo "</Directory>" >> /etc/apache2/conf-available/security.conf && \
+    echo "" >> /etc/apache2/conf-available/security.conf && \
+    echo "<Directory /var/www/html>" >> /etc/apache2/conf-available/security.conf && \
+    echo "    Options Indexes FollowSymLinks" >> /etc/apache2/conf-available/security.conf && \
+    echo "    AllowOverride All" >> /etc/apache2/conf-available/security.conf && \
+    echo "    Require all granted" >> /etc/apache2/conf-available/security.conf && \
+    echo "</Directory>" >> /etc/apache2/conf-available/security.conf && \
+    a2enconf security
 
 # Suppress Apache warning
 RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf && a2enconf servername
