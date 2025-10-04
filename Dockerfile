@@ -31,6 +31,7 @@ RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php && \
     sed -i "s/username_here/rmsals/" /var/www/html/wp-config.php && \
     sed -i "s/password_here/1q2w3e/" /var/www/html/wp-config.php && \
     sed -i "s/localhost/svc.sel4.cloudtype.app:30333/" /var/www/html/wp-config.php && \
+    sed -i "s/\$table_prefix = 'wp_';/\$table_prefix = 'blog1';/" /var/www/html/wp-config.php && \
     echo "\$_SERVER['HTTPS'] = 'on';" >> /var/www/html/wp-config.php && \
     echo "define('FORCE_SSL_ADMIN', true);" >> /var/www/html/wp-config.php && \
     echo "define('WP_SITEURL', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config.php && \
