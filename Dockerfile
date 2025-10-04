@@ -46,12 +46,12 @@ RUN sed -i "s/database_name_here/blog4/" /var/www/html/wp-config-sample.php && \
 RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
 
 # Fix Mixed Content issues without redirect loops
-RUN echo "define('WP_DEBUG', false);" >> /var/www/html/wp-config.php && \
-    echo "define('WP_DEBUG_LOG', false);" >> /var/www/html/wp-config.php && \
-    echo "define('WP_DEBUG_DISPLAY', false);" >> /var/www/html/wp-config.php && \
-    echo "define('SCRIPT_DEBUG', false);" >> /var/www/html/wp-config.php && \
-    echo "define('FORCE_SSL_ADMIN', false);" >> /var/www/html/wp-config.php && \
-    echo "define('WP_HTTPS', true);" >> /var/www/html/wp-config.php
+RUN echo "if (!defined('WP_DEBUG')) define('WP_DEBUG', false);" >> /var/www/html/wp-config.php && \
+    echo "if (!defined('WP_DEBUG_LOG')) define('WP_DEBUG_LOG', false);" >> /var/www/html/wp-config.php && \
+    echo "if (!defined('WP_DEBUG_DISPLAY')) define('WP_DEBUG_DISPLAY', false);" >> /var/www/html/wp-config.php && \
+    echo "if (!defined('SCRIPT_DEBUG')) define('SCRIPT_DEBUG', false);" >> /var/www/html/wp-config.php && \
+    echo "if (!defined('FORCE_SSL_ADMIN')) define('FORCE_SSL_ADMIN', false);" >> /var/www/html/wp-config.php && \
+    echo "if (!defined('WP_HTTPS')) define('WP_HTTPS', true);" >> /var/www/html/wp-config.php
 
 # Set proper permissions for wp-content
 RUN chown -R www-data:www-data /var/www/html/wp-content && \
