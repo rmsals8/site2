@@ -1,11 +1,10 @@
 FROM wordpress:latest
 
-# Install required packages (including mysql-client for healthcheck)
+# Install required packages
 RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     vim \
-    default-mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Set upload limits
@@ -13,97 +12,35 @@ RUN echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/uploads.ini &&
     echo "post_max_size = 64M" >> /usr/local/etc/php/conf.d/uploads.ini && \
     echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/uploads.ini
 
-# Clear /var/www/html completely first
-RUN rm -rf /var/www/html/*
+# Create uploads directory
+RUN mkdir -p /var/www/html/wp-content/uploads && \
+    chown -R www-data:www-data /var/www/html/wp-content/uploads
 
-# Download and extract WordPress core files at build time
+# --- Ensure WordPress core exists (some runtimes mount empty volume) ---
 RUN curl -sSL https://wordpress.org/latest.tar.gz | tar -xz --strip-components=1 -C /var/www/html
 
-# Verify index.php exists
-RUN ls -la /var/www/html/index.php
+# --- Copy custom theme and plugin ---
+COPY wp-content/themes/resume-theme    /var/www/html/wp-content/themes/resume-theme
+# NOTE: resume-manager plugin directory is currently empty; comment out to avoid build failure
+# COPY wp-content/plugins/resume-manager /var/www/html/wp-content/plugins/resume-manager
 
-# Copy wp-content directory (this will overwrite the default wp-content)
-COPY wp-content/ /var/www/html/wp-content/
-
-# Create wp-config.php at build time with hardcoded values
-RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php && \
-    sed -i "s/database_name_here/blog4/" /var/www/html/wp-config.php && \
-    sed -i "s/username_here/rmsals/" /var/www/html/wp-config.php && \
-    sed -i "s/password_here/1q2w3e/" /var/www/html/wp-config.php && \
-    sed -i "s/localhost/svc.sel4.cloudtype.app:30333/" /var/www/html/wp-config.php && \
-    sed -i "s/\$table_prefix = 'wp_';/\$table_prefix = 'wp_';/" /var/www/html/wp-config.php && \
-    curl -s https://api.wordpress.org/secret-key/1.1/salt/ > /tmp/wp-keys.txt && \
-    sed -i "/put your unique phrase here/d" /var/www/html/wp-config.php && \
-    sed -i "/@-/r /tmp/wp-keys.txt" /var/www/html/wp-config.php && \
-    echo "" >> /var/www/html/wp-config.php && \
-    echo "/* SSL and Proxy Settings */" >> /var/www/html/wp-config.php && \
-    echo "if (isset(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {" >> /var/www/html/wp-config.php && \
-    echo "    \$_SERVER['HTTPS'] = 'on';" >> /var/www/html/wp-config.php && \
-    echo "}" >> /var/www/html/wp-config.php && \
-    echo "if (isset(\$_SERVER['HTTP_X_FORWARDED_HOST'])) {" >> /var/www/html/wp-config.php && \
-    echo "    \$_SERVER['HTTP_HOST'] = \$_SERVER['HTTP_X_FORWARDED_HOST'];" >> /var/www/html/wp-config.php && \
-    echo "}" >> /var/www/html/wp-config.php && \
-    echo "define('WP_HOME', 'https://port-0-site2-m9aydkxq51acab43.sel4.cloudtype.app');" >> /var/www/html/wp-config.php && \
-    echo "define('WP_SITEURL', 'https://port-0-site2-m9aydkxq51acab43.sel4.cloudtype.app');" >> /var/www/html/wp-config.php && \
-    echo "if (!defined('FORCE_SSL_ADMIN')) define('FORCE_SSL_ADMIN', true);" >> /var/www/html/wp-config.php
-
-# Set ownership and permissions
+# --- Set ownership ---
 RUN chown -R www-data:www-data /var/www/html
-RUN find /var/www/html -type d -exec chmod 755 {} \;
-RUN find /var/www/html -type f -exec chmod 644 {} \;
-RUN chmod -R 775 /var/www/html/wp-content
 
-# Fix wp-admin directory permissions and ownership
-RUN chown -R www-data:www-data /var/www/html/wp-admin && \
-    chmod -R 755 /var/www/html/wp-admin && \
-    find /var/www/html/wp-admin -name "*.php" -exec chmod 644 {} \;
+# Change Apache listen port from 80 ➜ 8080 to avoid privileged port requirement in non-root containers (e.g., Cloudtype)
+RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/default-ssl.conf
 
-# Create .htaccess file for WordPress
-RUN echo "# BEGIN WordPress" > /var/www/html/.htaccess && \
-    echo "<IfModule mod_rewrite.c>" >> /var/www/html/.htaccess && \
-    echo "RewriteEngine On" >> /var/www/html/.htaccess && \
-    echo "RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]" >> /var/www/html/.htaccess && \
-    echo "RewriteBase /" >> /var/www/html/.htaccess && \
-    echo "RewriteRule ^index\.php$ - [L]" >> /var/www/html/.htaccess && \
-    echo "RewriteCond %{REQUEST_FILENAME} !-f" >> /var/www/html/.htaccess && \
-    echo "RewriteCond %{REQUEST_FILENAME} !-d" >> /var/www/html/.htaccess && \
-    echo "RewriteRule . /index.php [L]" >> /var/www/html/.htaccess && \
-    echo "</IfModule>" >> /var/www/html/.htaccess && \
-    echo "# END WordPress" >> /var/www/html/.htaccess
+# Suppress "Could not reliably determine the server's fully qualified domain name" warning
+RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf && a2enconf servername
 
-# Create a new Apache configuration file for WordPress
-RUN echo '<VirtualHost *:8080>' > /etc/apache2/sites-available/wordpress.conf && \
-    echo '    ServerAdmin webmaster@localhost' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '    DocumentRoot /var/www/html' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '    <Directory /var/www/html>' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '        Options Indexes FollowSymLinks' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '        AllowOverride All' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '        Require all granted' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '    </Directory>' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '    <Directory /var/www/html/wp-admin>' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '        Options Indexes FollowSymLinks' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '        AllowOverride All' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '        Require all granted' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '    </Directory>' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '    ErrorLog ${APACHE_LOG_DIR}/error.log' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '    CustomLog ${APACHE_LOG_DIR}/access.log combined' >> /etc/apache2/sites-available/wordpress.conf && \
-    echo '</VirtualHost>' >> /etc/apache2/sites-available/wordpress.conf
+# Configure WordPress database settings for Cloudtype
+RUN sed -i "s/database_name_here/blog4/" /var/www/html/wp-config-sample.php && \
+    sed -i "s/username_here/rmsals/" /var/www/html/wp-config-sample.php && \
+    sed -i "s/password_here/1q2w3e/" /var/www/html/wp-config-sample.php && \
+    sed -i "s/localhost/svc.sel4.cloudtype.app:30333/" /var/www/html/wp-config-sample.php
 
-# Change Apache port to 8080
-RUN sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf
-
-# Disable default site and enable WordPress site
-RUN a2dissite 000-default.conf && \
-    a2ensite wordpress.conf
-
-# Enable rewrite module
-RUN a2enmod rewrite
-
-# Set ServerName
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+# Copy the configured wp-config-sample.php to wp-config.php
+RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
 
 # Expose new application port
 EXPOSE 8080
