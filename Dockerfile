@@ -52,10 +52,14 @@ RUN sed -i "s/database_name_here/blog4/" /var/www/html/wp-config-sample.php && \
     sed -i "s/localhost/svc.sel4.cloudtype.app:30333/" /var/www/html/wp-config-sample.php
 
 # Add additional WordPress configuration to prevent redirect loops
-RUN echo "define('WP_HOME', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config-sample.php && \
-    echo "define('WP_SITEURL', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config-sample.php && \
-    echo "define('FORCE_SSL_ADMIN', false);" >> /var/www/html/wp-config-sample.php && \
-    echo "define('WP_DEBUG', false);" >> /var/www/html/wp-config-sample.php
+RUN echo "if (!defined('WP_HOME')) define('WP_HOME', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config-sample.php && \
+    echo "if (!defined('WP_SITEURL')) define('WP_SITEURL', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config-sample.php && \
+    echo "if (!defined('FORCE_SSL_ADMIN')) define('FORCE_SSL_ADMIN', false);" >> /var/www/html/wp-config-sample.php && \
+    echo "if (!defined('WP_DEBUG')) define('WP_DEBUG', false);" >> /var/www/html/wp-config-sample.php && \
+    echo "if (!defined('WP_DEBUG_LOG')) define('WP_DEBUG_LOG', false);" >> /var/www/html/wp-config-sample.php && \
+    echo "if (!defined('WP_DEBUG_DISPLAY')) define('WP_DEBUG_DISPLAY', false);" >> /var/www/html/wp-config-sample.php && \
+    echo "if (!defined('DISALLOW_FILE_EDIT')) define('DISALLOW_FILE_EDIT', true);" >> /var/www/html/wp-config-sample.php && \
+    echo "if (!defined('WP_MEMORY_LIMIT')) define('WP_MEMORY_LIMIT', '256M');" >> /var/www/html/wp-config-sample.php
 
 # Copy the configured wp-config-sample.php to wp-config.php
 RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
