@@ -36,30 +36,11 @@ RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf /etc/apache2/sites-available/00
 # Suppress "Could not reliably determine the server's fully qualified domain name" warning
 RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf && a2enconf servername
 
-# Add Apache configuration to prevent redirect loops
-RUN echo "RewriteEngine On" > /etc/apache2/conf-available/wordpress.conf && \
-    echo "RewriteCond %{HTTPS} off" >> /etc/apache2/conf-available/wordpress.conf && \
-    echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]" >> /etc/apache2/conf-available/wordpress.conf && \
-    echo "RewriteCond %{REQUEST_FILENAME} !-f" >> /etc/apache2/conf-available/wordpress.conf && \
-    echo "RewriteCond %{REQUEST_FILENAME} !-d" >> /etc/apache2/conf-available/wordpress.conf && \
-    echo "RewriteRule . /index.php [L]" >> /etc/apache2/conf-available/wordpress.conf && \
-    a2enconf wordpress
-
 # Configure WordPress database settings for Cloudtype
 RUN sed -i "s/database_name_here/blog4/" /var/www/html/wp-config-sample.php && \
     sed -i "s/username_here/rmsals/" /var/www/html/wp-config-sample.php && \
     sed -i "s/password_here/1q2w3e/" /var/www/html/wp-config-sample.php && \
     sed -i "s/localhost/svc.sel4.cloudtype.app:30333/" /var/www/html/wp-config-sample.php
-
-# Add additional WordPress configuration to prevent redirect loops
-RUN echo "if (!defined('WP_HOME')) define('WP_HOME', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config-sample.php && \
-    echo "if (!defined('WP_SITEURL')) define('WP_SITEURL', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config-sample.php && \
-    echo "if (!defined('FORCE_SSL_ADMIN')) define('FORCE_SSL_ADMIN', false);" >> /var/www/html/wp-config-sample.php && \
-    echo "if (!defined('WP_DEBUG')) define('WP_DEBUG', false);" >> /var/www/html/wp-config-sample.php && \
-    echo "if (!defined('WP_DEBUG_LOG')) define('WP_DEBUG_LOG', false);" >> /var/www/html/wp-config-sample.php && \
-    echo "if (!defined('WP_DEBUG_DISPLAY')) define('WP_DEBUG_DISPLAY', false);" >> /var/www/html/wp-config-sample.php && \
-    echo "if (!defined('DISALLOW_FILE_EDIT')) define('DISALLOW_FILE_EDIT', true);" >> /var/www/html/wp-config-sample.php && \
-    echo "if (!defined('WP_MEMORY_LIMIT')) define('WP_MEMORY_LIMIT', '256M');" >> /var/www/html/wp-config-sample.php
 
 # Copy the configured wp-config-sample.php to wp-config.php
 RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
